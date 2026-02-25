@@ -38,6 +38,12 @@ if (app.get("env") === "production") {
 app.use(session(sessionParms));
 app.use(require("connect-flash")());
 
+app.use(require("./middleware/storeLocals"));
+app.get("/", (req, res) => {
+  res.render("index");
+});
+app.use("/sessions", require("./routes/sessionRoutes"));
+
 // let secretWord = "syzygy";
 app.get("/secretWord", (req, res) => {
   if (!req.session.secretWord) {
@@ -73,6 +79,7 @@ const port = process.env.PORT || 3000;
 
 const start = async () => {
   try {
+    await require("./db/connect")(process.env.MONGO_URI);
     app.listen(port, () =>
       console.log(`Server is listening on port ${port}...`),
     );
