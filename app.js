@@ -27,7 +27,8 @@ const sessionParms = {
   resave: true,
   saveUninitialized: true,
   store: store,
-  cookie: { secure: false, sameSite: "strict" },
+  // cookie: { secure: false, sameSite: "strict" },
+  cookie: { secure: false, sameSite: "lax" },
 };
 
 if (app.get("env") === "production") {
@@ -36,6 +37,14 @@ if (app.get("env") === "production") {
 }
 
 app.use(session(sessionParms));
+
+const passport = require("passport");
+const passportInit = require("./passport/passportInit");
+
+passportInit();
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use(require("connect-flash")());
 
 app.use(require("./middleware/storeLocals"));
