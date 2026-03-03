@@ -27,7 +27,8 @@ const sessionParms = {
   resave: true,
   saveUninitialized: true,
   store: store,
-  cookie: { secure: false, sameSite: "strict" },
+  // cookie: { secure: false, sameSite: "strict" },
+  cookie: { secure: false, sameSite: "lax" },
 };
 
 if (app.get("env") === "production") {
@@ -36,7 +37,21 @@ if (app.get("env") === "production") {
 }
 
 app.use(session(sessionParms));
+
+const passport = require("passport");
+const passportInit = require("./passport/passportInit");
+
+passportInit();
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use(require("connect-flash")());
+
+app.use(require("./middleware/storeLocals"));
+app.get("/", (req, res) => {
+  res.render("index");
+});
+app.use("/sessions", require("./routes/sessionRoutes"));
 
 // let secretWord = "syzygy";
 app.get("/secretWord", (req, res) => {
@@ -73,6 +88,7 @@ const port = process.env.PORT || 3000;
 
 const start = async () => {
   try {
+    await require("./db/connect")(process.env.MONGO_URI);
     app.listen(port, () =>
       console.log(`Server is listening on port ${port}...`),
     );
