@@ -1,0 +1,52 @@
+<%- include("../partials/head.ejs") %>
+<%- include("../partials/header.ejs") %>
+
+<h2>Edit Item</h2>
+
+<% if (typeof errors !== "undefined" && errors.length) { %>
+  <ul>
+    <% errors.forEach((e) => { %>
+      <li><%= e %></li>
+    <% }) %>
+  </ul>
+<% } %>
+
+<form method="POST" action="/items/<%= item._id %>/update">
+  <div>
+    <label>Name:</label>
+    <input name="name" value="<%= item.name %>" />
+  </div>
+
+  <div>
+    <label>Quantity:</label>
+    <input name="quantity" type="number" min="1" value="<%= item.quantity %>" />
+  </div>
+
+  <div>
+    <label>Category:</label>
+    <input name="category" value="<%= item.category %>" />
+  </div>
+
+  <div>
+    <label>Notes:</label>
+    <input name="notes" value="<%= item.notes %>" />
+  </div>
+
+  <div>
+    <label>Planned For:</label>
+    <input name="plannedFor" type="date"
+      value="<%= item.plannedFor ? item.plannedFor.toISOString().substring(0,10) : "" %>" />
+  </div>
+
+  <div>
+    <label>Bought:</label>
+    <input name="bought" type="checkbox" <%= item.bought ? "checked" : "" %> />
+  </div>
+
+  <input type="hidden" name="_csrf" value="<%= _csrf %>" />
+
+  <button>Update</button>
+  <a href="/items"><button type="button">Cancel</button></a>
+</form>
+
+<%- include("../partials/footer.ejs") %>

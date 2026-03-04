@@ -1,0 +1,46 @@
+<%- include("../partials/head.ejs") %>
+<%- include("../partials/header.ejs") %>
+
+<h2>My Items</h2>
+
+<p><a href="/items/new">Add Item</a></p>
+
+<% if (typeof errors !== "undefined" && errors.length) { %>
+  <ul>
+    <% errors.forEach((e) => { %>
+      <li><%= e %></li>
+    <% }) %>
+  </ul>
+<% } %>
+
+<table border="1" cellpadding="6">
+  <tr>
+    <th>Name</th>
+    <th>Qty</th>
+    <th>Category</th>
+    <th>Notes</th>
+<th>Planned For</th>
+    <th>Bought</th>
+    <th>Actions</th>
+  </tr>
+  <% items.forEach((item) => { %>
+    <tr>
+      <td><%= item.name %></td>
+      <td><%= item.quantity %></td>
+      <td><%= item.category %></td>
+      <td><%= item.notes %></td>
+<td><%= item.plannedFor ? item.plannedFor.toDateString() : "" %></td>
+      <td><%= item.bought ? "Yes" : "No" %></td>
+      <td>
+        <a href="/items/<%= item._id %>/edit"><button type="button">Edit</button></a>
+
+  <form method="POST" action="/items/<%= item._id %>/delete" style="display:inline;">
+    <input type="hidden" name="_csrf" value="<%= _csrf %>" />
+    <button>Delete</button>
+  </form>
+</td>
+    </tr>
+  <% }) %>
+</table>
+
+<%- include("../partials/footer.ejs") %>

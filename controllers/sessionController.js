@@ -1,17 +1,24 @@
 const User = require("../models/User");
 const parseVErr = require("../util/parseValidationErrs");
+const csrf = require("host-csrf");
 
 const registerShow = (req, res) => {
+  csrf.getToken(req, res);
   res.render("register");
 };
 
 const registerDo = async (req, res, next) => {
   if (req.body.password != req.body.password1) {
     req.flash("error", "The passwords entered do not match.");
-    return res.render("register", { errors: flash("errors") });
+    return res.render("register", { errors: req.flash("error") });
   }
   try {
-    await User.create(req.body);
+    // await User.create(req.body);
+    await User.create({
+      name: req.body.name,
+      email: req.body.email,
+      password: req.body.password,
+    });
   } catch (e) {
     if (e.constructor.name === "ValidationError") {
       parseVErr(e, req);
@@ -20,7 +27,7 @@ const registerDo = async (req, res, next) => {
     } else {
       return next(e);
     }
-    return res.render("register", { errors: flash("errors") });
+    return res.render("register", { errors: req.flash("error") });
   }
   res.redirect("/");
 };
@@ -47,6 +54,7 @@ const logonShow = (req, res) => {
   if (req.user) {
     return res.redirect("/");
   }
+  csrf.getToken(req, res);
   res.render("logon");
 };
 
