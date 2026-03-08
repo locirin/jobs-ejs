@@ -1,13 +1,24 @@
 const express = require("express");
 require("express-async-errors");
+// secret word handling
+require("dotenv").config();
+
+const cookieParser = require("cookie-parser");
+const csrf = require("host-csrf");
 
 const app = express();
 
 app.set("view engine", "ejs");
 app.use(require("body-parser").urlencoded({ extended: true }));
 
-// secret word handling
-require("dotenv").config(); // to load the .env file into the process.env object
+app.use(cookieParser(process.env.SESSION_SECRET));
+const csrfMiddleware = csrf.csrf();
+app.use(csrfMiddleware);
+app.use((req, res, next) => {
+  csrf.getToken(req, res);
+  next();
+});
+
 const session = require("express-session");
 
 const MongoDBStore = require("connect-mongodb-session")(session);
@@ -41,6 +52,8 @@ app.use(session(sessionParms));
 const passport = require("passport");
 const passportInit = require("./passport/passportInit");
 
+const auth = require("./middleware/auth");
+
 passportInit();
 app.use(passport.initialize());
 app.use(passport.session());
@@ -52,19 +65,27 @@ app.get("/", (req, res) => {
   res.render("index");
 });
 app.use("/sessions", require("./routes/sessionRoutes"));
+app.use("/items", require("./routes/itemRoutes"));
 
 // let secretWord = "syzygy";
-app.get("/secretWord", (req, res) => {
+app.get("/secretWord", auth, (req, res) => {
   if (!req.session.secretWord) {
     req.session.secretWord = "syzygy";
   }
 
+  csrf.getToken(req, res);
+
   res.locals.info = req.flash("info");
   res.locals.errors = req.flash("error");
-  res.render("secretWord", { secretWord: req.session.secretWord });
+
+  // res.render("secretWord", { secretWord: req.session.secretWord });
+  res.render("secretWord", {
+    secretWord: req.session.secretWord,
+    // _csrf: req.csrfToken(),
+  });
 });
 
-app.post("/secretWord", (req, res) => {
+app.post("/secretWord", auth, (req, res) => {
   if (req.body.secretWord.toUpperCase()[0] == "P") {
     req.flash("error", "That word won't work!");
     req.flash("error", "You can't use words that start with p.");
