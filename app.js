@@ -6,10 +6,24 @@ require("dotenv").config();
 const cookieParser = require("cookie-parser");
 const csrf = require("host-csrf");
 
+const helmet = require("helmet");
+const xss = require("xss-clean");
+const rateLimit = require("express-rate-limit");
+
 const app = express();
 
 app.set("view engine", "ejs");
 app.use(require("body-parser").urlencoded({ extended: true }));
+
+app.use(helmet());
+app.use(xss());
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+});
+
+app.use(limiter);
 
 app.use(cookieParser(process.env.SESSION_SECRET));
 const csrfMiddleware = csrf.csrf();
@@ -25,7 +39,6 @@ const MongoDBStore = require("connect-mongodb-session")(session);
 const url = process.env.MONGO_URI;
 
 const store = new MongoDBStore({
-  // may throw an error, which won't be caught
   uri: url,
   collection: "mySessions",
 });
@@ -38,7 +51,7 @@ const sessionParms = {
   resave: true,
   saveUninitialized: true,
   store: store,
-  // cookie: { secure: false, sameSite: "strict" },
+
   cookie: { secure: false, sameSite: "lax" },
 };
 
@@ -54,6 +67,8 @@ const passportInit = require("./passport/passportInit");
 
 const auth = require("./middleware/auth");
 
+const taskRoutes = require("./routes/taskRoutes");
+
 passportInit();
 app.use(passport.initialize());
 app.use(passport.session());
@@ -61,39 +76,74 @@ app.use(passport.session());
 app.use(require("connect-flash")());
 
 app.use(require("./middleware/storeLocals"));
+
 app.get("/", (req, res) => {
+  if (req.user) {
+    if (!req.user.familyCode) {
+      return res.redirect("/family-code");
+    }
+    return res.redirect("/tasks");
+  }
+
   res.render("index");
 });
+
 app.use("/sessions", require("./routes/sessionRoutes"));
-app.use("/items", require("./routes/itemRoutes"));
+
+app.use("/tasks", auth, taskRoutes);
 
 // let secretWord = "syzygy";
-app.get("/secretWord", auth, (req, res) => {
-  if (!req.session.secretWord) {
-    req.session.secretWord = "syzygy";
+// app.get("/secretWord", auth, (req, res) => {
+//   if (!req.session.secretWord) {
+//     req.session.secretWord = "syzygy";
+//   }
+
+//   csrf.getToken(req, res);
+
+//   res.locals.info = req.flash("info");
+//   res.locals.errors = req.flash("error");
+
+//   // res.render("secretWord", { secretWord: req.session.secretWord });
+//   res.render("secretWord", {
+//     secretWord: req.session.secretWord,
+//     // _csrf: req.csrfToken(),
+//   });
+// });
+
+// app.post("/secretWord", auth, (req, res) => {
+//   if (req.body.secretWord.toUpperCase()[0] == "P") {
+//     req.flash("error", "That word won't work!");
+//     req.flash("error", "You can't use words that start with p.");
+//   } else {
+//     req.session.secretWord = req.body.secretWord;
+//     req.flash("info", "The secret word was changed.");
+//   }
+//   res.redirect("/secretWord");
+// });
+
+app.get("/family-code", (req, res) => {
+  if (!req.user) {
+    return res.redirect("/");
   }
 
-  csrf.getToken(req, res);
-
-  res.locals.info = req.flash("info");
-  res.locals.errors = req.flash("error");
-
-  // res.render("secretWord", { secretWord: req.session.secretWord });
-  res.render("secretWord", {
-    secretWord: req.session.secretWord,
-    // _csrf: req.csrfToken(),
-  });
+  res.render("familyCode");
 });
 
-app.post("/secretWord", auth, (req, res) => {
-  if (req.body.secretWord.toUpperCase()[0] == "P") {
-    req.flash("error", "That word won't work!");
-    req.flash("error", "You can't use words that start with p.");
-  } else {
-    req.session.secretWord = req.body.secretWord;
-    req.flash("info", "The secret word was changed.");
+app.post("/family-code", async (req, res) => {
+  if (!req.user) {
+    return res.redirect("/");
   }
-  res.redirect("/secretWord");
+
+  const code = req.body.familyCode?.trim();
+
+  if (!code) {
+    return res.send("Family code is required");
+  }
+
+  req.user.familyCode = code;
+  await req.user.save();
+
+  res.redirect("/tasks");
 });
 
 app.use((req, res) => {

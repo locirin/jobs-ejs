@@ -1,0 +1,55 @@
+<%- include("../partials/head.ejs") %> 
+
+<%- include("../partials/header.ejs") %>
+
+<h2>Edit Task</h2>
+
+<form method="POST" action="/tasks/update/<%= task._id %>">
+
+<!-- Hidden field for CSRF protection -->
+  <input type="hidden" name="_csrf" value="<%= _csrf %>" />
+
+<!-- Existing task name -->
+  <input name="title" required value="<%= task.title %>" />
+
+
+<!-- Task title -->
+<select name="status">
+  <option value="open" <%= task.status === "open" ? "selected" : "" %>>To Do</option>
+  <option value="done" <%= task.status === "done" ? "selected" : "" %>>Done</option>
+</select>
+
+
+<!-- Task notes -->
+<input name="notes" value="<%= task.notes %>" />
+
+<!-- Assigned to -->
+ <div>
+  <label for="assignedToName">Assigned To</label>
+  <input
+    type="text"
+    id="assignedToName"
+    name="assignedToName"
+    value="<%= task.assignedToName || '' %>"
+  />
+</div>
+
+<!-- Due Date -->
+<div>
+  <label for="dueDate">Due Date</label>
+  <input
+    type="date"
+    id="dueDate"
+    name="dueDate"
+    value="<%= task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : '' %>"
+  />
+</div>
+
+
+  <button>Update Task</button>
+</form>
+
+<!-- Go back to task list -->
+<p><a href="/tasks">Back to Family Task Board</a></p>
+
+<%- include("../partials/footer.ejs") %>

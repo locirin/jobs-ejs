@@ -1,0 +1,25 @@
+<%- include("./partials/head.ejs") %> <%- include("./partials/header.ejs") %>
+
+<h2>Create or Join Family Board</h2>
+
+<p>Choose a code to create a new family board.</p>
+<p>
+  Or enter the same code another family member already uses to join that board.
+</p>
+
+<form method="POST" action="/family-code">
+  <input type="hidden" name="_csrf" value="<%= _csrf %>" />
+
+  <label for="familyCode">Family Code</label>
+  <input
+    type="text"
+    id="familyCode"
+    name="familyCode"
+    placeholder="Enter family code"
+    required
+  />
+
+  <button>Save Code</button>
+</form>
+
+<%- include("./partials/footer.ejs") %>
