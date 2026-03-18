@@ -1,10 +1,13 @@
-<%- include("partials/head.ejs") %>
-<%- include("partials/header.ejs") %>
-<% if (user) { %>
-    <a href="/secretWord">Click this link to view/change the secret word.</a>
-    <a href="/items">Go to my items</a>
-<% } else { %>
-    <a href="/sessions/logon">Click this link to logon.</a>
-    <a href="/sessions/register">Click this link to register.</a>
-<% } %>
+<%- include("partials/head.ejs") %> <%- include("partials/header.ejs") %>
+<!-- <% if (user) { %> -->
+<!-- <a href="/secretWord">Click this link to view/change the secret word.</a>
+    <a href="/items">Go to my items</a> -->
+<!-- <a href="/tasks">Go to family tasks</a> -->
+<!-- <% } else { %> -->
+
+<!-- Index page shown for non logged in users -->
+<a href="/sessions/logon">Click this link to logon.</a>
+<a href="/sessions/register">Click this link to register.</a>
+
+<!-- <% } %> -->
 <%- include("partials/footer.ejs") %>

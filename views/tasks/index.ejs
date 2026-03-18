@@ -1,0 +1,98 @@
+<%- include("../partials/head.ejs") %>
+
+<%- include("../partials/header.ejs") %>
+
+<!-- App navigation -->
+<form method="GET" action="/tasks/new"  style="display: inline">
+  <button>Add New Task</button>
+</form>
+
+<!-- Refresh button -->
+ <form method="GET" action="/tasks" style="display: inline">
+  <button>Refresh</button>
+</form>
+
+
+<!-- <p>Family Code: <%= currentFamilyCode %></p> -->
+
+<% if (tasks.length === 0) { %>
+  <p>No tasks yet. Click "Add New Task" to create one.</p>
+<% } else { %>
+
+  <!-- <ul>
+    <% tasks.forEach((task) => { %>
+      <li>
+        <p>
+          <strong><%= task.title %></strong> |
+          Status: <%= task.status %> |
+          Notes: <%= task.notes || "No notes" %> |
+          Due: <%= task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "No due date" %> |
+          Created by: <%= task.createdByName || "Unknown" %> |
+          Assigned to: <%= task.assignedToName || "Unassigned" %>
+        </p>
+
+        <form method="GET" action="/tasks/edit/<%= task._id %>" style="display: inline">
+          <button>Edit</button>
+        </form>
+
+        &nbsp;
+
+        <form method="POST" action="/tasks/delete/<%= task._id %>" style="display: inline">
+          <input type="hidden" name="_csrf" value="<%= _csrf %>" />
+          <button>Delete</button>
+        </form>
+      </li>
+    <% }) %>
+  </ul> -->
+
+  <table border="1" cellpadding="8">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Status</th>
+        <th>Notes</th>
+        <th>Due</th>
+        <th>Created by</th>
+        <th>Assigned to</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% tasks.forEach((task) => { %>
+        <tr>
+          <td><%= task.title %></td>
+          <td><%= task.status === "open" ? "To Do" : "Done" %></td>
+          <td><%= task.notes || "No notes" %></td>
+          <td><%= task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "No due date" %></td>
+          <td><%= task.createdByName || "Unknown" %></td>
+          <td><%= task.assignedToName || "Unassigned" %></td>
+          <td>
+            <form method="GET" action="/tasks/edit/<%= task._id %>" style="display: inline">
+              <button>Edit</button>
+            </form>
+
+            <form method="POST" action="/tasks/delete/<%= task._id %>" style="display: inline">
+              <input type="hidden" name="_csrf" value="<%= _csrf %>" />
+              <button>Delete</button>
+            </form>
+
+            <!-- Update Status -->
+<form method="POST" action="/tasks/status/<%= task._id %>" style="display: inline">
+  <input type="hidden" name="_csrf" value="<%= _csrf %>" />
+
+  <select name="status">
+    <option value="open" <%= task.status === "open" ? "selected" : "" %>>To Do</option>
+    <option value="done" <%= task.status === "done" ? "selected" : "" %>>Done</option>
+  </select>
+
+  <button>Update Status</button>
+</form> 
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+
+  <% } %>
+
+<%- include("../partials/footer.ejs") %>

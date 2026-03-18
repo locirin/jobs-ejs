@@ -1,0 +1,44 @@
+<%- include("../partials/head.ejs") %> <%- include("../partials/header.ejs") %>
+
+<h2>Add New Task</h2>
+
+<form method="POST" action="/tasks">
+  <!-- Hidden field for CSRF protection -->
+  <input type="hidden" name="_csrf" value="<%= _csrf %>" />
+
+  <!-- Task title -->
+  <input name="title" required placeholder="Task title" />
+
+  <!-- Status for the new task -->
+  <select name="status">
+    <option value="open">To Do</option>
+    <option value="done">Done</option>
+  </select>
+
+  <!-- Notes for the new task -->
+  <input name="notes" placeholder="Notes" />
+
+  <!-- Assigned to -->
+  <div>
+    <label for="assignedToName">Assigned To</label>
+    <input
+      type="text"
+      id="assignedToName"
+      name="assignedToName"
+      placeholder="Assign to someone"
+    />
+  </div>
+
+  <!-- Due Date -->
+  <div>
+    <label for="dueDate">Due Date</label>
+    <input type="date" id="dueDate" name="dueDate" />
+  </div>
+
+  <button>Create Task</button>
+</form>
+
+<!-- Back to tasks page -->
+<p><a href="/tasks">Back to Family Task Board</a></p>
+
+<%- include("../partials/footer.ejs") %>
